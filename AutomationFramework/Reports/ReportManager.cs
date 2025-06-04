@@ -29,6 +29,8 @@ namespace AutomationFramework.Reports
             ReportFolderSetup();
 
             var htmlReporter = new ExtentSparkReporter($"{ReportFolderPath}\\report.html");
+            //var htmlReporter = new ExtentSparkReporter($"C:\\Automation\\Reports\\report.html");
+        
             htmlReporter.Config.Theme = AventStack.ExtentReports.Reporter.Config.Theme.Dark;
             Extent = new ExtentReports();
             Extent.AddSystemInfo("Project", "Automation Framework");
@@ -89,7 +91,8 @@ namespace AutomationFramework.Reports
         private static string CaptureScreenshot2(IWebDriver driver)
         {
             // Tomar el screenshot
-            var screenshotPath = $"{ReportFolderPath}//ScreenShots//screenshot_{DateTime.Now:MMddyyyy_hhmmss}.png";
+            var screenshotPath = $"{ReportFolderPath}\\ScreenShots\\screenshot_{DateTime.Now:MMddyyyy_hhmmss}.png";
+            //var screenshotPath = $"C:\\Automation\\Reports\\ScreenShots\\screenshot_{DateTime.Now:MMddyyyy_hhmmss}.png";
             Screenshot screenshot = ((ITakesScreenshot)driver).GetScreenshot();
             screenshot.SaveAsFile(screenshotPath);
             return screenshotPath;
