@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace AutomationFramework.Tests
 {
     [TestFixture]
-    public class LoginTests : BaseTest
+    public class LoginTests2 : BaseTest
     {
 
         [Test]

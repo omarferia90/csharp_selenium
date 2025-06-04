@@ -1,6 +1,8 @@
-﻿using AventStack.ExtentReports;
+﻿using AutomationFramework.Utilities;
+using AventStack.ExtentReports;
 using AventStack.ExtentReports.Reporter;
 using OpenQA.Selenium;
+using Sprache;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,74 +15,120 @@ namespace AutomationFramework.Reports
     public static class ReportManager
     {
         public static ExtentReports Extent;
-        public static ExtentTest Test;
-        private static string ScreenShotDefaultPath = "C:\\Automation\\Reports\\Images\\";
+        [ThreadStatic] public static ExtentTest Test;
+        public static string ReportFolder = "";
+        public static string ReportFolderPath = "";
 
+        /// <summary>
+        /// Inits ExtentReports with prefilled configuration
+        /// </summary>
         public static void InitReport()
         {
-            var htmlReporter = new ExtentSparkReporter("C:\\Automation\\Reports\\report.html");
+            ReportFolder = $"Execution_{DateTime.Now.ToString("MMddyyyy_hhmmss")}";
+            ReportFolderPath = $"{EnvironmentConfig.ReportPath}{ReportFolder}";
+            ReportFolderSetup();
+
+            var htmlReporter = new ExtentSparkReporter($"{ReportFolderPath}\\report.html");
+            htmlReporter.Config.Theme = AventStack.ExtentReports.Reporter.Config.Theme.Dark;
             Extent = new ExtentReports();
+            Extent.AddSystemInfo("Project", "Automation Framework");
+            Extent.AddSystemInfo("Browser", EnvironmentConfig.Browser);
+            Extent.AddSystemInfo("Env", EnvironmentConfig.TestEnvironment);
+            Extent.AddSystemInfo("Executed By", Environment.UserName.ToString());
+            Extent.AddSystemInfo("Execution Time", DateTime.Now.ToString("MM/ddy/yyy hh:mm:ss"));
             Extent.AttachReporter(htmlReporter);
         }
 
+        /// <summary>
+        /// Creates a test case for ExtentReports
+        /// </summary>
+        /// <param name="testName"></param>
         public static void CreateTest(string testName)
         {
             Test = Extent.CreateTest(testName);
         }
 
-        public static void LogStep(string message, bool takeScreenshot = false, IWebDriver driver = null)
+        
+        /// <summary>
+        /// Logs a step during execution time
+        /// </summary>
+        /// <param name="status"></param>
+        /// <param name="message"></param>
+        /// <param name="driver"></param>
+        /// <param name="takeScreenshot"></param>
+        public static void LogStep(Status status, string message, IWebDriver driver = null, bool takeScreenshot = false)
         {
             if (takeScreenshot)
             {
-                //Test.Log(Status.Info, message).AddScreenCaptureFromPath(CaptureScreenshot());
-                Test.Log(Status.Info, message, MediaEntityBuilder.CreateScreenCaptureFromPath(CaptureScreenshot2(driver)).Build());
-
+                if (status == Status.Fail)
+                {
+                    Test.Log(status, new Exception(message), MediaEntityBuilder.CreateScreenCaptureFromPath(CaptureScreenshot2(driver)).Build());
+                }
+                else
+                {
+                    Test.Log(status, message, MediaEntityBuilder.CreateScreenCaptureFromPath(CaptureScreenshot2(driver)).Build());
+                }
             }
             else
             {
-                Test.Log(Status.Info, message);
+                if (status == Status.Fail){
+                    Test.Log(status, new Exception(message));
+                }
+                else {
+                    Test.Log(status, message);
+                }
+                
             }
         }
 
-        public static void LogError(string message, bool takeScreenshot = false, IWebDriver driver = null)
-        {
-            if (takeScreenshot)
-            {
-                //Test.Fail(message).AddScreenCaptureFromPath(screenshotPath);
-                Test.Fail(MediaEntityBuilder.CreateScreenCaptureFromPath(CaptureScreenshot2(driver)).Build());
-            }
-            else
-            {
-                Test.Fail(message);
-            }
-        }
-
-        private static string CaptureScreenshot(IWebDriver driver)
-        {
-            var fileName = $"{ScreenShotDefaultPath}screenshot_{DateTime.Now:yyyyMMdd_HHmmss}.png";
-            Screenshot screenshot = ((ITakesScreenshot)driver).GetScreenshot();
-            
-
-            // Guardar el archivo
-            string screenshotPath = Path.Combine(Directory.GetCurrentDirectory(), "screenshot.png");
-            screenshot.SaveAsFile(screenshotPath);
-            return fileName;
-        }
-
+        /// <summary>
+        /// Take a screenshot of current step
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <returns></returns>
         private static string CaptureScreenshot2(IWebDriver driver)
         {
             // Tomar el screenshot
-            var screenshotPath = $"{ScreenShotDefaultPath}screenshot_{DateTime.Now:yyyyMMdd_HHmmss}.png";
+            var screenshotPath = $"{ReportFolderPath}//ScreenShots//screenshot_{DateTime.Now:MMddyyyy_hhmmss}.png";
             Screenshot screenshot = ((ITakesScreenshot)driver).GetScreenshot();
             screenshot.SaveAsFile(screenshotPath);
             return screenshotPath;
         }
 
+        /// <summary>
+        /// Generates the report with all results
+        /// </summary>
         public static void FlushReport()
         {
             Extent.Flush();
         }
 
+        /// <summary>
+        /// Generates Base Folder for Report
+        /// </summary>
+        private static void ReportFolderSetup()
+        {
+            //Creates Folder for current execution
+            bool blFolderExist = System.IO.Directory.Exists(ReportFolderPath);
+            if (!blFolderExist)
+            {
+                System.IO.Directory.CreateDirectory(ReportFolderPath);
+            }
+            else
+                blFolderExist = false;
+            
+            //Creates Sub Folders that are necesary
+            string[] arrSubFolders = new string[2] { "ScreenShots", "Attachments" };
+            foreach (string strFolder in arrSubFolders)
+            {
+                blFolderExist = System.IO.Directory.Exists($"{ReportFolderPath}//{strFolder}");
+
+                if (!blFolderExist)
+                {
+                    System.IO.Directory.CreateDirectory($"{ReportFolderPath}//{strFolder}");
+                }
+            }
+        }
 
 
 

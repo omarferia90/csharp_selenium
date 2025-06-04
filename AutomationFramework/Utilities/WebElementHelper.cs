@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SeleniumExtras.WaitHelpers;
+using AventStack.ExtentReports;
 
 namespace AutomationFramework.Utilities
 {
@@ -33,11 +34,11 @@ namespace AutomationFramework.Utilities
             {
                 var element = FindElement(locator);
                 element.Click();
-                ReportManager.LogStep($"Clicked on element: {locator}");
+                ReportManager.LogStep(Status.Info, $"Clicked on element: {locator}", _driver);
             }
             catch (Exception e)
             {
-                ReportManager.LogError($"Click failed: {e.Message}");
+                ReportManager.LogStep(Status.Fail, $"Click failed: {e.Message}", _driver, true);
                 throw;
             }
         }
@@ -46,7 +47,7 @@ namespace AutomationFramework.Utilities
         {
             var dropdown = new SelectElement(FindElement(locator));
             dropdown.SelectByText(value);
-            ReportManager.LogStep($"Selected dropdown value: {value}");
+            ReportManager.LogStep(Status.Info, $"Selected dropdown value: {value}", _driver);
         }
 
         public void DoubleClick(By locator)
@@ -54,7 +55,8 @@ namespace AutomationFramework.Utilities
             var actions = new Actions(_driver);
             var element = FindElement(locator);
             actions.DoubleClick(element).Perform();
-            ReportManager.LogStep($"Double clicked element: {locator}");
+            //ReportManager.LogStep($"Double clicked element: {locator}");
+            ReportManager.LogStep(Status.Info, $"Double clicked element: {locator}", _driver);
         }
     }
 }
