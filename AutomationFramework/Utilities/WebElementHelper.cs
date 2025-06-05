@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SeleniumExtras.WaitHelpers;
 using AventStack.ExtentReports;
+using OpenQA.Selenium.BiDi.Modules.BrowsingContext;
 
 namespace AutomationFramework.Utilities
 {
@@ -23,40 +24,260 @@ namespace AutomationFramework.Utilities
             _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
         }
 
-        public IWebElement FindElement(By locator)
+        // ********************************************************************************************
+        // **          Native Functions for Selenium
+        // ********************************************************************************************
+
+        public IWebElement? FindElement(By locator)
         {
-            return _wait.Until(ExpectedConditions.ElementIsVisible(locator));
+            try 
+            {
+                return _wait.Until(ExpectedConditions.ElementIsVisible(locator));
+            }
+            catch (Exception ex) 
+            {
+                ReportManager.LogStep(Status.Fail, $"Find WebElement failed: {ex.Message}", _driver, true);
+                return null; 
+            }
         }
 
-        public void Click(By locator)
+        public void Clear(IWebElement element, string elementDescription)
         {
+            if (element == null)
+            {
+                ReportManager.LogStep(Status.Fail, "Clear failed: Element is null", _driver, true);
+                throw new ArgumentNullException(nameof(element), "Element passed to Click is null");
+            }
+
             try
             {
-                var element = FindElement(locator);
-                element.Click();
-                ReportManager.LogStep(Status.Info, $"Clicked on element: {locator}", _driver);
+                element.Clear();
+                Thread.Sleep(TimeSpan.FromSeconds(2));
+                ReportManager.LogStep(Status.Pass, $"Clear on element: {elementDescription}");
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                ReportManager.LogStep(Status.Fail, $"Click failed: {e.Message}", _driver, true);
+                ReportManager.LogStep(Status.Fail, $"Clear failed: {ex.Message}.", _driver, true);
                 throw;
             }
         }
 
-        public void SelectDropdown(By locator, string value)
+        public void Click(IWebElement element, string elementDescription)
         {
-            var dropdown = new SelectElement(FindElement(locator));
-            dropdown.SelectByText(value);
-            ReportManager.LogStep(Status.Info, $"Selected dropdown value: {value}", _driver);
+            if (element == null)
+            {
+                ReportManager.LogStep(Status.Fail, "Click failed: Element is null", _driver, true);
+                throw new ArgumentNullException(nameof(element), "Element passed to Click is null");
+            }
+
+            try
+            {
+                element.Click();
+                ReportManager.LogStep(Status.Pass, $"Clicked on element: {elementDescription}");
+            }
+            catch (Exception ex)
+            {
+                ReportManager.LogStep(Status.Fail, $"Click failed: {ex.Message}.", _driver, true);
+                throw;
+            }
         }
 
-        public void DoubleClick(By locator)
+        public void DoubleClick(IWebElement element, string elementDescription)
         {
-            var actions = new Actions(_driver);
-            var element = FindElement(locator);
-            actions.DoubleClick(element).Perform();
-            //ReportManager.LogStep($"Double clicked element: {locator}");
-            ReportManager.LogStep(Status.Info, $"Double clicked element: {locator}", _driver);
+            if (element == null)
+            {
+                ReportManager.LogStep(Status.Fail, "Double Click failed: Element is null", _driver, true);
+                throw new ArgumentNullException(nameof(element), "Element passed to Click is null");
+            }
+
+            try
+            {
+                var actions = new Actions(_driver);
+                actions.DoubleClick(element).Perform();
+                ReportManager.LogStep(Status.Pass, $"Double Clicked on element: {elementDescription}");
+            }
+            catch (Exception ex)
+            {
+                ReportManager.LogStep(Status.Fail, $"Double Click failed: {ex.Message}.", _driver, true);
+                throw;
+            }
         }
+
+        public void ScrollMiddle(IWebElement element, string elementDescription)
+        {
+            if (element == null)
+            {
+                ReportManager.LogStep(Status.Fail, "Scroll failed: Element is null", _driver, true);
+                throw new ArgumentNullException(nameof(element), "Element passed to Click is null");
+            }
+
+            try
+            {
+                var scrollElementIntoMiddle = "var viewPortHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0); var elementTop = arguments[0].getBoundingClientRect().top; window.scrollBy(0, elementTop-(viewPortHeight/2));";
+                ((IJavaScriptExecutor)_driver).ExecuteScript(scrollElementIntoMiddle, element);
+                ReportManager.LogStep(Status.Pass, $"Scroll Middle on element: {elementDescription}");
+            }
+            catch (Exception ex)
+            {
+                ReportManager.LogStep(Status.Fail, $"Scroll Middle failed: {ex.Message}.", _driver, true);
+                throw;
+            }
+        }
+
+        public string? GetAttribute(IWebElement element, string elementDescription, string attribute)
+        {
+            if (element == null)
+            {
+                ReportManager.LogStep(Status.Fail, "Get Attribute failed: Element is null", _driver, true);
+                throw new ArgumentNullException(nameof(element), "Element passed to Click is null");
+            }
+
+            try
+            {
+                ReportManager.LogStep(Status.Pass, $"Get Attribute on element: {elementDescription}");
+                return element.GetAttribute(attribute);
+            }
+            catch (Exception ex)
+            {
+                ReportManager.LogStep(Status.Fail, $"Get Attribute failed: {ex.Message}.", _driver, true);
+                return null;
+            }
+        }
+
+
+
+        // ********************************************************************************************
+        // **          Functions for Expexted Conditions
+        // ********************************************************************************************
+
+        
+        public bool WaitUntilElementPresent(By locator, TimeSpan? timeout = null) 
+        {
+            try
+            {
+                _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.PresenceOfAllElementsLocatedBy(locator));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public bool WaitUntilElementExist(By locator, TimeSpan? timeout = null)
+        {
+            try
+            {
+                _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(locator));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public bool WaitUntilElementIsVisible(By locator, TimeSpan? timeout = null)
+        {
+            try
+            {
+                _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(locator));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public bool WaitUntilElementToBeClickable(By locator, TimeSpan? timeout = null)
+        {
+            try
+            {
+                _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(locator));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public bool WaitUntilElementToBeSelected(By locator, TimeSpan? timeout = null)
+        {
+            try
+            {
+                _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeSelected(locator));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public bool WaitUntilElementHidden(By locator, TimeSpan? timeout = null)
+        {
+            try
+            {
+                _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.InvisibilityOfElementLocated(locator));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public bool WaitUntilElementHiddenWithText(By locator, string partialText, TimeSpan? timeout = null)
+        {
+            try
+            {
+                _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.InvisibilityOfElementWithText(locator, partialText));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public bool WaitUntilTitleContains(By locator, string partialText, TimeSpan? timeout = null)
+        {
+            try
+            {
+                _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.TitleContains(partialText));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public bool WaitUntilUrlContains(By locator, string partialText, TimeSpan? timeout = null)
+        {
+            try
+            {
+                _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.UrlContains(partialText));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
     }
 }
