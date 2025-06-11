@@ -25,17 +25,19 @@ namespace AutomationFramework.Reports
         public static void InitReport()
         {
             ReportFolder = $"Execution_{DateTime.Now.ToString("MMddyyyy_hhmmss")}";
-            ReportFolderPath = $"{EnvironmentConfig.ReportPath}{ReportFolder}";
+            ReportFolderPath = $"{TestContext.Parameters["ReportLocation"]}{ReportFolder}";
             ReportFolderSetup();
 
             var htmlReporter = new ExtentSparkReporter($"{ReportFolderPath}\\report.html");
+            htmlReporter.Config.TimeStampFormat = "HH:MM:ss";
             //var htmlReporter = new ExtentSparkReporter($"C:\\Automation\\Reports\\report.html");
         
             htmlReporter.Config.Theme = AventStack.ExtentReports.Reporter.Config.Theme.Dark;
             Extent = new ExtentReports();
-            Extent.AddSystemInfo("Project", "Automation Framework");
-            Extent.AddSystemInfo("Browser", EnvironmentConfig.Browser);
-            Extent.AddSystemInfo("Env", EnvironmentConfig.TestEnvironment);
+            Extent.AddSystemInfo("Project", TestContext.Parameters["ProjectName"]);
+            Extent.AddSystemInfo("ReportName", TestContext.Parameters["ReportName"]);
+            Extent.AddSystemInfo("Browser", TestContext.Parameters["BrowserName"]);
+            Extent.AddSystemInfo("Env", TestContext.Parameters["TestEnvironment"]);
             Extent.AddSystemInfo("Executed By", Environment.UserName.ToString());
             Extent.AddSystemInfo("Execution Time", DateTime.Now.ToString("MM/ddy/yyy hh:mm:ss"));
             Extent.AttachReporter(htmlReporter);

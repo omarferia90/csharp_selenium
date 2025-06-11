@@ -13,13 +13,16 @@
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
     <PackageReference Include="DotNetSeleniumExtras.WaitHelpers" Version="3.11.0" />
     <PackageReference Include="ExtentReports" Version="5.0.4" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.2" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />
     <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
     <PackageReference Include="NUnit.Analyzers" Version="3.6.1" />
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="Oracle.ManagedDataAccess" Version="23.8.0" />
     <PackageReference Include="Selenium.Support" Version="4.33.0" />
     <PackageReference Include="Selenium.WebDriver" Version="4.33.0" />
+    <PackageReference Include="SpreadsheetLight" Version="3.5.0" />
   </ItemGroup>
 
 </Project>

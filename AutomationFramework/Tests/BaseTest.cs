@@ -15,13 +15,22 @@ namespace AutomationFramework.Tests
         [OneTimeSetUp]
         public void GlobalSetup()
         {
+            //Verify .runsettings is loaded
+            string currentDirectory = TestContext.CurrentContext.WorkDirectory;
+            string projectRoot = Path.GetFullPath(Path.Combine(currentDirectory, @"..\..\..\"));
+            string runSettingsFile = Path.Combine(projectRoot, "Env.runsettings");
+            if (!File.Exists(runSettingsFile))
+            {
+                throw new FileNotFoundException($"El archivo '{runSettingsFile}' no fue encontrado en el directorio raíz del proyecto.");
+            }
+
             ReportManager.InitReport();
         }
 
         [SetUp]
         public void TestSetup()
         {
-            InitDriver(BrowserType.Chrome);
+            InitDriver(GetBrowserType());
             ReportManager.CreateTest(TestContext.CurrentContext.Test.Name);
         }
 

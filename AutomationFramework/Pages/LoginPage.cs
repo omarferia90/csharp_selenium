@@ -9,21 +9,17 @@ namespace AutomationFramework.Pages
 {
     public class LoginPage : BasePage
     {
-        private readonly By txtUsername = By.Id("username");
-        private readonly By txtPassword = By.Id("password");
-        private readonly By btnLogin = By.Id("login");
+        private readonly By textEmail = By.Id("ap_email_login");
+        private readonly By btnContinue = By.ClassName("a-button-input");
 
         public LoginPage(IWebDriver driver) : base(driver) { }
 
         public void Login(string username, string password)
         {
-            Helper.Click(txtUsername);
-            Driver.FindElement(txtUsername).SendKeys(username);
+            WEHelper.WaitUntilElementIsVisible(textEmail, TimeSpan.FromSeconds(15));
+            WEHelper.Click(WEHelper.GetElement(textEmail, ""), "");
+            WEHelper.Click(WEHelper.GetElement(btnContinue, ""), "");
 
-            Helper.Click(txtPassword);
-            Driver.FindElement(txtPassword).SendKeys(password);
-
-            Helper.Click(btnLogin);
         }
     }
 }

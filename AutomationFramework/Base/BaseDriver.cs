@@ -16,6 +16,20 @@ namespace AutomationFramework.Base
     {
         protected IWebDriver Driver;
 
+        public BrowserType GetBrowserType()
+        {
+            string browserFromSettings = TestContext.Parameters["BrowserName"];
+
+            if (Enum.TryParse<BrowserType>(browserFromSettings, true, out var browserEnum))
+            {
+                return browserEnum;
+            }
+            else
+            {
+                throw new ArgumentException($"El valor '{browserFromSettings}' no corresponde a un BrowserType válido.");
+            }
+        }
+
         /// <summary>
         /// Inits Driver Instance
         /// </summary>

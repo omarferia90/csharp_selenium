@@ -11,12 +11,12 @@ namespace AutomationFramework.Pages
     public abstract class BasePage
     {
         protected IWebDriver Driver;
-        protected WebElementHelper Helper;
+        protected WebElementHelper WEHelper;
 
         public BasePage(IWebDriver driver)
         {
             Driver = driver;
-            Helper = new WebElementHelper(driver);
+            WEHelper = new WebElementHelper(driver);
         }
     }
 }
